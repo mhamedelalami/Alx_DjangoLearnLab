@@ -25,9 +25,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "bookshelf",           # existing app
+    'bookshelf',           # existing app
     "relationship_app",    # existing app
-    "users" , 
+    #"users" , 
 ]
 
 MIDDLEWARE = [
@@ -57,7 +57,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "LibraryProject.wsgi.application"
+WSGI_APPLICATION = "LibraryProject.LibraryProject.wsgi.application"
+
 
 # Database
 DATABASES = {
@@ -98,7 +99,6 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-AUTH_USER_MODEL = "users.CustomUser"  
+ 
 
 AUTH_USER_MODEL = 'bookshelf.CustomUser'
