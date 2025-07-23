@@ -25,7 +25,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    'bookshelf',           # existing app
+    'LibraryProject.bookshelf',           # existing app
     "relationship_app",    # existing app
     #"users" , 
 ]

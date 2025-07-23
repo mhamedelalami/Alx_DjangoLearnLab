@@ -51,7 +51,6 @@ class CustomUser(AbstractUser):
         help_text=_('User\'s profile picture')
     )
     
-    # Use our custom manager
     objects = CustomUserManager()
     
     class Meta:
@@ -80,7 +79,6 @@ class UserProfile(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.role}"
 
-# Signal handlers to automatically create/save UserProfile
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_user_profile(sender, instance, created, **kwargs):
     """Create UserProfile when a new user is created"""
@@ -93,11 +91,18 @@ def save_user_profile(sender, instance, **kwargs):
     if hasattr(instance, 'userprofile'):
         instance.userprofile.save()
 
-# Original Book model
 class Book(models.Model):
     title = models.CharField(max_length=200)
     author = models.CharField(max_length=100)
     publication_year = models.IntegerField()
- 
+
+    class Meta:
+        permissions = [
+            ("can_view", "Can view book"),
+            ("can_create", "Can create book"),
+            ("can_edit", "Can edit book"),
+            ("can_delete", "Can delete book"),
+        ]
+
     def __str__(self):
         return f"{self.title} by {self.author} ({self.publication_year})"
