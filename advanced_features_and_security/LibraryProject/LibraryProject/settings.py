@@ -14,8 +14,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 SECRET_KEY = "django-insecure-^u0la6mhkw88b0rs=7ep!g!b6_q$-5zup_fz)xi3(yz98mz+7x"
-DEBUG = True
-ALLOWED_HOSTS = []
+
+# SECURITY: Set to False for production environment to avoid sensitive info leakage
+DEBUG = False
+
+# Add your domain or IP address here when deploying
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 # ✅ Application definition
 INSTALLED_APPS = [
@@ -28,10 +32,12 @@ INSTALLED_APPS = [
     'LibraryProject.bookshelf',           # existing app
     "relationship_app",    # existing app
     #"users" , 
+    'csp'
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "csp.middleware.CSPMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -99,6 +105,37 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
- 
 
 AUTH_USER_MODEL = 'bookshelf.CustomUser'
+
+# --- Security Settings ---
+
+# Protect against Cross-site scripting (XSS)
+SECURE_BROWSER_XSS_FILTER = True
+
+# Prevent Clickjacking
+X_FRAME_OPTIONS = 'DENY'
+
+# Prevent MIME-type sniffing
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# Ensure cookies are sent only over HTTPS connections (use HTTPS in production)
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+
+# Redirect all HTTP traffic to HTTPS (enable only if HTTPS is configured)
+SECURE_SSL_REDIRECT = True
+
+# HTTP Strict Transport Security (HSTS) — enforces HTTPS for given time
+SECURE_HSTS_SECONDS = 3600  # 1 hour, increase in production
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
+# Content Security Policy (CSP) settings
+CSP_DEFAULT_SRC = ("'self'",)
+CSP_SCRIPT_SRC = ("'self'",)
+CSP_STYLE_SRC = ("'self'",)
+CSP_IMG_SRC = ("'self'",)
+CSP_FONT_SRC = ("'self'",)
+CSP_CONNECT_SRC = ("'self'",)
+CSP_FRAME_SRC = ("'none'",)
