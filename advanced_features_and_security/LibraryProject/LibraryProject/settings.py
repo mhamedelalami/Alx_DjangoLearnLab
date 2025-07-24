@@ -123,13 +123,13 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 
-# Redirect all HTTP traffic to HTTPS (enable only if HTTPS is configured)
-SECURE_SSL_REDIRECT = True
+# Redirect all HTTP requests to HTTPS
+SECURE_SSL_REDIRECT = True  # Ensures all traffic is redirected to HTTPS
 
-# HTTP Strict Transport Security (HSTS) — enforces HTTPS for given time
-SECURE_HSTS_SECONDS = 3600  # 1 hour, increase in production
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
+# HTTP Strict Transport Security (HSTS) settings
+SECURE_HSTS_SECONDS = 31536000  # One year in seconds
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # Applies HSTS to all subdomains
+SECURE_HSTS_PRELOAD = True  # Allows your domain to be included in browser HSTS preload list
 
 # Content Security Policy (CSP) settings
 CSP_DEFAULT_SRC = ("'self'",)
@@ -139,3 +139,5 @@ CSP_IMG_SRC = ("'self'",)
 CSP_FONT_SRC = ("'self'",)
 CSP_CONNECT_SRC = ("'self'",)
 CSP_FRAME_SRC = ("'none'",)
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = True
