@@ -8,6 +8,6 @@ urlpatterns = [
 
     # Endpoints for a single book
     path('books/<int:pk>/', BookDetailView.as_view(), name='book-detail'),
-    path('books/<int:pk>/update/', BookUpdateView.as_view(), name='book-update'),
-    path('books/<int:pk>/delete/', BookDeleteView.as_view(), name='book-delete'),
+    path('books/<int:pk>/update/', BookUpdateView.as_view(), name='book-update'),  # Add this line
+    path('books/<int:pk>/delete/', BookDeleteView.as_view(), name='book-delete'),  # Add this line
 ]
