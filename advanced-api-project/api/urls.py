@@ -1,10 +1,13 @@
 from django.urls import path
-from .views import BookListCreate, BookRetrieveUpdateDestroy
+from .views import BookListView, BookDetailView, BookCreateView, BookUpdateView, BookDeleteView
 
 urlpatterns = [
-    # Endpoint for listing books and creating a new book
-    path('books/', BookListCreate.as_view(), name='book-list-create'),
+    # Endpoints for listing all books and creating a new book
+    path('books/', BookListView.as_view(), name='book-list'),
+    path('books/create/', BookCreateView.as_view(), name='book-create'),
 
-    # Endpoint for retrieving, updating, or deleting a specific book by its primary key (pk)
-    path('books/<int:pk>/', BookRetrieveUpdateDestroy.as_view(), name='book-retrieve-update-destroy'),
+    # Endpoints for a single book
+    path('books/<int:pk>/', BookDetailView.as_view(), name='book-detail'),
+    path('books/<int:pk>/update/', BookUpdateView.as_view(), name='book-update'),
+    path('books/<int:pk>/delete/', BookDeleteView.as_view(), name='book-delete'),
 ]
