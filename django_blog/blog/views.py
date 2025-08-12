@@ -6,6 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy, reverse
 from .forms import CustomUserCreationForm, CommentForm
 from .models import Post, Comment
+from django.db.models import Q
 
 def home(request):
     return render(request, 'blog/home.html')
@@ -140,3 +141,13 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         post = self.get_object()
         return self.request.user == post.author
+
+def search_posts(request):
+    query = request.GET.get('q', '')
+    results = Post.objects.filter(
+        Q(title__icontains=query) |
+        Q(content__icontains=query) |
+        Q(tags__name__icontains=query)
+    ).distinct() if query else Post.objects.none()
+
+    return render(request, 'blog/search_results.html', {'results': results, 'query': query})
