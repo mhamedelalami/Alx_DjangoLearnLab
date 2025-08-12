@@ -179,3 +179,53 @@ This Django blog project includes full CRUD (Create, Read, Update, Delete) funct
 - All templates follow consistent styling to integrate smoothly with the site's CSS.
 - Testing includes verifying form submissions, permission checks, and navigation flows.
 
+# Comment System
+
+## Overview
+
+This project includes a comment system to enhance interactivity by allowing users to read and engage with blog posts through comments. Authenticated users can post, edit, and delete their comments, fostering community discussions.
+
+## Features
+
+- **View Comments:** All visitors can see comments under each blog post.
+- **Add Comments:** Only logged-in users can add new comments.
+- **Edit Comments:** Users can edit only their own comments.
+- **Delete Comments:** Users can delete only their own comments.
+- Comments are shown in reverse chronological order (newest first).
+
+## Models
+
+- **Comment**
+  - `post`: ForeignKey linking to the associated blog post.
+  - `author`: ForeignKey to the user who wrote the comment.
+  - `content`: TextField containing the comment text.
+  - `created_at`: DateTimeField marking the comment creation time.
+  - `updated_at`: DateTimeField marking the last update time.
+
+## Views & Permissions
+
+- **Add Comment:** Function-based view `add_comment` requiring authentication.
+- **Edit Comment:** Class-based view `CommentUpdateView`, restricted to comment authors.
+- **Delete Comment:** Class-based view `CommentDeleteView`, restricted to comment authors.
+- **Post Detail:** Displays the post content, all related comments, and a form to add a new comment (for authenticated users).
+
+## URLs
+
+- Create comment: `/posts/<post_pk>/comments/new/`
+- Edit comment: `/comments/<comment_pk>/edit/`
+- Delete comment: `/comments/<comment_pk>/delete/`
+
+## Templates
+
+- Comments appear on the blog post detail page.
+- Separate templates handle comment creation/editing (`comment_form.html`) and deletion confirmation (`comment_confirm_delete.html`).
+
+## Usage Instructions
+
+1. Navigate to a blog post detail page.
+2. Scroll to the comments section to view existing comments.
+3. If logged in, submit a new comment using the provided form.
+4. Edit or delete your own comments using the links displayed next to your comments.
+5. If not logged in, users are prompted to log in to add comments.
+
+---
