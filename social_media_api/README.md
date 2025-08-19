@@ -358,3 +358,93 @@ Authorization: Token <user_token>
 * Pagination and filtering are available for posts and comments.
 
 ---
+
+Here’s a final continuation for your README that completes it with **Step 7: Documentation and Final Testing**, deployment notes, and final remarks:
+
+## 7. Deployment & Production
+
+### Environment Configuration
+
+For production, the following environment variables should be set (e.g., in Railway, Heroku, or another hosting service):
+
+```env
+SECRET_KEY=your_production_secret_key
+DEBUG=False
+ALLOWED_HOSTS=your-production-domain.com
+DATABASE_URL=postgres://DB_USER:DB_PASSWORD@DB_HOST:DB_PORT/DB_NAME
+SECURE_SSL_REDIRECT=True
+````
+
+### Production Settings in `settings.py`
+
+* `DEBUG = False`
+
+* `ALLOWED_HOSTS` configured for your domain or hosting service
+
+* Security settings enabled:
+
+  * `SECURE_BROWSER_XSS_FILTER = True`
+  * `X_FRAME_OPTIONS = 'DENY'`
+  * `SECURE_CONTENT_TYPE_NOSNIFF = True`
+  * `CSRF_COOKIE_SECURE = True`
+  * `SESSION_COOKIE_SECURE = True`
+
+* Static files served via WhiteNoise:
+
+```python
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+```
+
+* Database configured via `dj-database-url` to handle PostgreSQL URLs.
+
+### Deployment Steps (Example with Railway)
+
+1. Connect your GitHub repository to Railway.
+2. Set the environment variables listed above in Railway.
+3. Railway will automatically build and deploy your Django API.
+4. Ensure migrations are applied via Railway’s CLI or dashboard:
+
+```bash
+railway run python manage.py migrate
+```
+
+5. Collect static files:
+
+```bash
+railway run python manage.py collectstatic --noinput
+```
+
+### Final Testing
+
+* Verify all endpoints work as expected:
+
+  * User registration & login
+  * Post creation, update, deletion
+  * Comment creation, update, deletion
+  * Like/unlike functionality
+  * Follows & feed endpoints
+  * Notifications endpoint
+* Ensure only authenticated users can perform protected actions.
+* Check pagination, filtering, and ordering work correctly in production.
+* Verify HTTPS and security settings are properly applied.
+
+---
+
+## 8. Additional Notes
+
+* The API is ready for real-world usage and can be integrated with frontend clients.
+* Use token-based authentication for API requests.
+* Keep the `.env` file secret; never commit it to public repositories.
+* Regularly monitor logs and perform maintenance for dependencies and security updates.
+
+---
+
+## Live Application URL
+
+`<insert-your-live-url-here>`
+
+---
+
+## License
+
+MIT License
