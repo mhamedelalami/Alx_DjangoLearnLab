@@ -1,25 +1,22 @@
-from rest_framework import viewsets, permissions, filters, generics
+from rest_framework import viewsets, permissions, filters, status, generics
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from django.contrib.auth import get_user_model
-from .models import Post, Comment
+from .models import Post, Comment, Like
 from .serializers import PostSerializer, CommentSerializer
 
-User = get_user_model()
-
-# Permission: Only owners can edit/delete
+# Permission class
 class IsOwnerOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
             return True
         return obj.author == request.user
 
-# CRUD for posts
+# Post ViewSet
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all().order_by('-created_at')
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
-
-    # Filtering, search, and ordering
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['author__username']
     search_fields = ['title', 'content']
@@ -28,13 +25,11 @@ class PostViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-# CRUD for comments
+# Comment ViewSet
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all().order_by('-created_at')
     serializer_class = CommentSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
-
-    # Filtering, search, and ordering
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['author__username', 'post']
     search_fields = ['content']
@@ -43,13 +38,26 @@ class CommentViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-# Feed view: posts from followed users
-class FeedView(generics.ListAPIView):
-    serializer_class = PostSerializer
+# Like a post
+class LikePostView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def get_queryset(self):
-        # Get the users the current user is following
-        following_users = self.request.user.following.all()
-        # Return posts by followed users ordered by creation date
-        return Post.objects.filter(author__in=following_users).order_by('-created_at')
+    def post(self, request, pk):
+        post = get_object_or_404(Post, pk=pk)
+        like, created = Like.objects.get_or_create(post=post, user=request.user)
+        if not created:
+            return Response({"message": "You already liked this post."}, status=status.HTTP_400_BAD_REQUEST)
+        # Optional: create a notification for the post author here
+        return Response({"message": f"You liked the post '{post.title}'."}, status=status.HTTP_200_OK)
+
+# Unlike a post
+class UnlikePostView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        post = get_object_or_404(Post, pk=pk)
+        like = Like.objects.filter(post=post, user=request.user).first()
+        if not like:
+            return Response({"message": "You haven't liked this post yet."}, status=status.HTTP_400_BAD_REQUEST)
+        like.delete()
+        return Response({"message": f"You unliked the post '{post.title}'."}, status=status.HTTP_200_OK)

@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "accounts",  # Custom app for user accounts
     "posts",
     "django_filters",
+    "notifications",
 ]
 
 MIDDLEWARE = [

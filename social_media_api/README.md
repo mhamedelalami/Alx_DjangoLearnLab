@@ -1,10 +1,6 @@
-Here’s a complete, ready-to-copy README combining **setup, user registration/authentication, posts/comments, and follows/feed**:
-
----
-
 # Social Media API
 
-A Django REST Framework API that allows users to register, authenticate, create posts, comment on posts, follow other users, and view a personalized feed.
+A Django REST Framework API that allows users to register, authenticate, create posts, comment on posts, follow other users, view a personalized feed, like posts, and receive notifications.
 
 ---
 
@@ -226,11 +222,139 @@ class CustomUser(AbstractUser):
 
 ---
 
-## 5. Permissions & Notes
+## 5. Likes & Notifications
 
-* Only authenticated users can create posts/comments, follow/unfollow, or view their feed.
+### Like Model
+
+Tracks which users have liked which posts.
+
+```python
+class Like(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+```
+
+### Notifications Model
+
+Tracks interactions such as likes, new followers, and comments.
+
+```python
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+
+class Notification(models.Model):
+    recipient = models.ForeignKey(CustomUser, related_name='notifications', on_delete=models.CASCADE)
+    actor = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    verb = models.CharField(max_length=255)  # e.g., "liked your post"
+    target_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
+    target_object_id = models.PositiveIntegerField(null=True, blank=True)
+    target = GenericForeignKey('target_content_type', 'target_object_id')
+    timestamp = models.DateTimeField(auto_now_add=True)
+    read = models.BooleanField(default=False)
+```
+
+---
+
+### Like Endpoints
+
+#### Like a Post
+
+**POST** `/api/posts/<post_id>/like/`
+
+* Authenticated users can like a post. Users cannot like the same post multiple times.
+
+**Request Example:**
+
+```http
+POST /api/posts/12/like/
+Authorization: Token <user_token>
+```
+
+**Response Example:**
+
+```json
+{
+    "message": "You have liked the post."
+}
+```
+
+#### Unlike a Post
+
+**POST** `/api/posts/<post_id>/unlike/`
+
+* Authenticated users can remove their like from a post.
+
+**Request Example:**
+
+```http
+POST /api/posts/12/unlike/
+Authorization: Token <user_token>
+```
+
+**Response Example:**
+
+```json
+{
+    "message": "You have unliked the post."
+}
+```
+
+---
+
+### Notifications Endpoint
+
+#### View Notifications
+
+**GET** `/api/notifications/`
+
+* Fetch all notifications for the authenticated user, ordered by timestamp (most recent first).
+* Unread notifications are highlighted.
+
+**Request Example:**
+
+```http
+GET /api/notifications/
+Authorization: Token <user_token>
+```
+
+**Response Example:**
+
+```json
+[
+    {
+        "id": 1,
+        "actor": "john_doe",
+        "verb": "liked your post",
+        "target": "Post: Amazing Sunset",
+        "timestamp": "2025-08-19T15:23:00Z",
+        "read": false
+    },
+    {
+        "id": 2,
+        "actor": "alice_smith",
+        "verb": "started following you",
+        "target": null,
+        "timestamp": "2025-08-19T14:50:00Z",
+        "read": true
+    }
+]
+```
+
+---
+
+### Benefits
+
+* **User Engagement:** Encourages interaction with posts and other users.
+* **Real-time Feedback:** Users know when their content is liked or when they have new followers.
+* **Retention:** Notifications help users stay active on the platform.
+
+---
+
+## 6. Permissions & Notes
+
+* Only authenticated users can create posts/comments, follow/unfollow, like/unlike posts, view notifications, or see their feed.
 * Users can only edit or delete their own posts/comments.
 * Pagination and filtering are available for posts and comments.
 
 ---
-
