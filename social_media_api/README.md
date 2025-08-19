@@ -1,232 +1,236 @@
-Perfect! Here’s a **complete `README.md`** combining your user authentication and posts/comments API documentation, ready to copy:
-
-````markdown
-# Social Media API
-
-A simple Django REST Framework API for a social media platform. Users can register, log in, create posts, and engage with posts through comments.
+Here’s a complete, ready-to-copy README combining **setup, user registration/authentication, posts/comments, and follows/feed**:
 
 ---
 
-## Setup Instructions
+# Social Media API
 
-1. **Clone the repository**
+A Django REST Framework API that allows users to register, authenticate, create posts, comment on posts, follow other users, and view a personalized feed.
+
+---
+
+## 1. Setup
+
+1. Clone the repository:
+
 ```bash
-git clone <repository_url>
+git clone <repo-url>
 cd social_media_api
-````
-
-2. **Create and activate a virtual environment**
-
-```bash
-python -m venv venv
-# Windows
-venv\Scripts\activate
-# macOS/Linux
-source venv/bin/activate
 ```
 
-3. **Install dependencies**
+2. Install dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-4. **Apply migrations**
+3. Apply migrations:
 
 ```bash
 python manage.py makemigrations
 python manage.py migrate
 ```
 
-5. **Run the development server**
+4. Create a superuser (optional, for admin access):
+
+```bash
+python manage.py createsuperuser
+```
+
+5. Run the development server:
 
 ```bash
 python manage.py runserver
 ```
 
-The API will be available at `http://127.0.0.1:8000/`.
-
 ---
 
-## Authentication
+## 2. User Registration & Authentication
 
-The API uses token-based authentication.
+### Register
 
-* **Register a user**: `/api/accounts/register/` (POST)
-* **Login / Get token**: `/api/accounts/login/` (POST)
+**POST** `/api/accounts/register/`
 
-### **Register Request**
+**Request:**
 
 ```json
 {
-    "username": "johndoe",
-    "email": "john@example.com",
-    "password": "yourpassword"
+    "username": "user123",
+    "email": "user@example.com",
+    "password": "securepassword"
 }
 ```
 
-**Response**
+**Response:**
 
 ```json
 {
     "id": 1,
-    "username": "johndoe",
-    "email": "john@example.com"
+    "username": "user123",
+    "email": "user@example.com"
 }
 ```
 
-### **Login Request**
+### Login / Get Token
+
+**POST** `/api/accounts/login/`
+
+**Request:**
 
 ```json
 {
-    "username": "johndoe",
-    "password": "yourpassword"
+    "username": "user123",
+    "password": "securepassword"
 }
 ```
 
-**Response**
+**Response:**
 
 ```json
 {
-    "token": "your_auth_token"
+    "token": "abcd1234efgh5678",
+    "user_id": 1,
+    "username": "user123"
 }
 ```
 
-> Include the token in the header for authenticated requests:
+### User Profile
 
-```
-Authorization: Token <your_token_here>
-```
+**GET / PUT** `/api/accounts/profile/`
+
+* Retrieve or update the logged-in user’s profile.
 
 ---
 
-## User Profile
+## 3. Posts & Comments
 
-**Endpoint:** `/api/accounts/profile/`
-**Methods:** `GET`, `PUT`, `PATCH`
+### Post Model
 
-* **GET** → Retrieve your profile
-* **PUT / PATCH** → Update your profile
+* `author`: User
+* `title`: string
+* `content`: string
+* `created_at`: datetime
+* `updated_at`: datetime
 
-**Example GET Response**
+### Comment Model
+
+* `post`: Post
+* `author`: User
+* `content`: string
+* `created_at`: datetime
+* `updated_at`: datetime
+
+### Endpoints
+
+#### Posts
+
+* **GET** `/api/posts/` – List all posts (supports filtering by author, search by title/content, ordering)
+* **POST** `/api/posts/` – Create a new post
+* **GET / PUT / DELETE** `/api/posts/<id>/` – Retrieve, update, or delete a post (only author can modify)
+
+#### Comments
+
+* **GET** `/api/comments/` – List all comments (filter by author or post)
+* **POST** `/api/comments/` – Create a new comment
+* **GET / PUT / DELETE** `/api/comments/<id>/` – Retrieve, update, or delete a comment (only author can modify)
+
+**Example Post Response:**
 
 ```json
 {
     "id": 1,
-    "username": "johndoe",
-    "email": "john@example.com"
-}
-```
-
----
-
-## Posts API
-
-**Endpoint:** `/api/posts/`
-**Methods:** `GET`, `POST`
-
-* **GET /api/posts/** → List all posts (paginated)
-* **POST /api/posts/** → Create a new post
-
-**POST Request**
-
-```json
-{
-    "title": "My First Post",
-    "content": "This is the content of my post."
-}
-```
-
-**POST Response**
-
-```json
-{
-    "id": 1,
-    "author": "johndoe",
+    "author": "user123",
     "title": "My First Post",
     "content": "This is the content of my post.",
-    "created_at": "2025-08-19T18:40:00Z",
-    "updated_at": "2025-08-19T18:40:00Z"
+    "created_at": "2025-08-19T15:30:00Z",
+    "updated_at": "2025-08-19T15:30:00Z"
 }
 ```
 
-**Endpoint:** `/api/posts/<id>/`
-**Methods:** `GET`, `PUT`, `PATCH`, `DELETE`
-
-* **GET** → Retrieve a single post
-* **PUT / PATCH** → Update a post (author only)
-* **DELETE** → Delete a post (author only)
-
-**Filtering / Searching / Ordering**
-
-```
-GET /api/posts/?search=keyword&author__username=johndoe&ordering=-created_at
-```
-
----
-
-## Comments API
-
-**Endpoint:** `/api/comments/`
-**Methods:** `GET`, `POST`
-
-* **GET /api/comments/** → List all comments (paginated)
-* **POST /api/comments/** → Create a new comment
-
-**POST Request**
-
-```json
-{
-    "post": 1,
-    "content": "This is a comment on the post."
-}
-```
-
-**POST Response**
+**Example Comment Response:**
 
 ```json
 {
     "id": 1,
     "post": 1,
-    "author": "johndoe",
-    "content": "This is a comment on the post.",
-    "created_at": "2025-08-19T18:45:00Z",
-    "updated_at": "2025-08-19T18:45:00Z"
+    "author": "friend456",
+    "content": "Great post!",
+    "created_at": "2025-08-19T16:00:00Z",
+    "updated_at": "2025-08-19T16:00:00Z"
 }
 ```
 
-**Endpoint:** `/api/comments/<id>/`
-**Methods:** `GET`, `PUT`, `PATCH`, `DELETE`
+---
 
-* **GET** → Retrieve a single comment
-* **PUT / PATCH** → Update a comment (author only)
-* **DELETE** → Delete a comment (author only)
+## 4. User Follows & Feed
 
-**Filtering / Searching / Ordering**
+### User Model Update
 
+```python
+class CustomUser(AbstractUser):
+    bio = models.TextField(blank=True, null=True)
+    profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
+    followers = models.ManyToManyField(
+        'self', symmetrical=False, related_name='following', blank=True
+    )
 ```
-GET /api/comments/?search=keyword&post=1&author__username=johndoe&ordering=-created_at
+
+* `followers`: users who follow this user
+* `following`: users this user follows (reverse relation)
+
+### Follow Endpoints
+
+#### Follow a user
+
+**POST** `/api/accounts/follow/<user_id>/`
+
+**Response Example:**
+
+```json
+{
+    "message": "You are now following user123."
+}
+```
+
+#### Unfollow a user
+
+**POST** `/api/accounts/unfollow/<user_id>/`
+
+**Response Example:**
+
+```json
+{
+    "message": "You have unfollowed user123."
+}
+```
+
+### Feed Endpoint
+
+**GET** `/api/posts/feed/`
+
+* Returns posts from users the current user follows, ordered by most recent first.
+
+**Response Example:**
+
+```json
+[
+    {
+        "id": 1,
+        "author": "user123",
+        "title": "My First Post",
+        "content": "This is the content of my post.",
+        "created_at": "2025-08-19T15:30:00Z",
+        "updated_at": "2025-08-19T15:30:00Z"
+    }
+]
 ```
 
 ---
 
-## Permissions
+## 5. Permissions & Notes
 
-* Users can only edit or delete their own posts and comments.
-* Anyone can view posts and comments.
-
----
-
-## Pagination
-
-* List endpoints for posts and comments are paginated.
-* Use `?page=<number>` to navigate pages.
+* Only authenticated users can create posts/comments, follow/unfollow, or view their feed.
+* Users can only edit or delete their own posts/comments.
+* Pagination and filtering are available for posts and comments.
 
 ---
 
-## Notes
-
-* All dates are in ISO 8601 format.
-* Always include your authentication token when performing POST, PUT, PATCH, or DELETE requests.
-
-```
