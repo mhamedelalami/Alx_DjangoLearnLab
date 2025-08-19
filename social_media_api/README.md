@@ -1,16 +1,17 @@
+Perfect! Here’s a **complete `README.md`** combining your user authentication and posts/comments API documentation, ready to copy:
+
+````markdown
 # Social Media API
 
-A simple **Django REST Framework API** for user authentication and profile management.  
-Users can register, log in, and manage their profiles using token-based authentication.
+A simple Django REST Framework API for a social media platform. Users can register, log in, create posts, and engage with posts through comments.
 
 ---
 
-## Setup
+## Setup Instructions
 
 1. **Clone the repository**
-
 ```bash
-git clone <your-repo-url>
+git clone <repository_url>
 cd social_media_api
 ````
 
@@ -27,17 +28,17 @@ source venv/bin/activate
 3. **Install dependencies**
 
 ```bash
-pip install django djangorestframework
+pip install -r requirements.txt
 ```
 
-4. **Run migrations**
+4. **Apply migrations**
 
 ```bash
 python manage.py makemigrations
 python manage.py migrate
 ```
 
-5. **Start the development server**
+5. **Run the development server**
 
 ```bash
 python manage.py runserver
@@ -47,49 +48,51 @@ The API will be available at `http://127.0.0.1:8000/`.
 
 ---
 
-## User Authentication
+## Authentication
 
-### Register a New User
+The API uses token-based authentication.
 
-* **Endpoint:** `POST /api/accounts/register/`
-* **Request Body (JSON):**
+* **Register a user**: `/api/accounts/register/` (POST)
+* **Login / Get token**: `/api/accounts/login/` (POST)
 
-```json
-{
-  "username": "testuser",
-  "email": "testuser@example.com",
-  "password": "TestPass123",
-  "bio": "Hello, I am a test user."
-}
-```
-
-* **Response:** Returns user details (excluding password).
-
----
-
-### Login
-
-* **Endpoint:** `POST /api/accounts/login/`
-* **Request Body (JSON):**
+### **Register Request**
 
 ```json
 {
-  "username": "testuser",
-  "password": "TestPass123"
+    "username": "johndoe",
+    "email": "john@example.com",
+    "password": "yourpassword"
 }
 ```
 
-* **Response:** Returns a JSON object with:
+**Response**
 
 ```json
 {
-  "token": "xxxxxxxxxxxxxxxxxxxx",
-  "user_id": 1,
-  "username": "testuser"
+    "id": 1,
+    "username": "johndoe",
+    "email": "john@example.com"
 }
 ```
 
-* **Usage:** Include the token in the `Authorization` header for protected endpoints:
+### **Login Request**
+
+```json
+{
+    "username": "johndoe",
+    "password": "yourpassword"
+}
+```
+
+**Response**
+
+```json
+{
+    "token": "your_auth_token"
+}
+```
+
+> Include the token in the header for authenticated requests:
 
 ```
 Authorization: Token <your_token_here>
@@ -97,15 +100,133 @@ Authorization: Token <your_token_here>
 
 ---
 
-## User Model Overview
+## User Profile
 
-The custom user model extends Django’s `AbstractUser` and includes:
+**Endpoint:** `/api/accounts/profile/`
+**Methods:** `GET`, `PUT`, `PATCH`
 
-* **username** – required
-* **email** – optional
-* **bio** – short biography of the user
-* **profile\_picture** – image for user avatar
-* **followers** – ManyToMany field referencing other users (symmetrical=False)
+* **GET** → Retrieve your profile
+* **PUT / PATCH** → Update your profile
+
+**Example GET Response**
+
+```json
+{
+    "id": 1,
+    "username": "johndoe",
+    "email": "john@example.com"
+}
+```
 
 ---
 
+## Posts API
+
+**Endpoint:** `/api/posts/`
+**Methods:** `GET`, `POST`
+
+* **GET /api/posts/** → List all posts (paginated)
+* **POST /api/posts/** → Create a new post
+
+**POST Request**
+
+```json
+{
+    "title": "My First Post",
+    "content": "This is the content of my post."
+}
+```
+
+**POST Response**
+
+```json
+{
+    "id": 1,
+    "author": "johndoe",
+    "title": "My First Post",
+    "content": "This is the content of my post.",
+    "created_at": "2025-08-19T18:40:00Z",
+    "updated_at": "2025-08-19T18:40:00Z"
+}
+```
+
+**Endpoint:** `/api/posts/<id>/`
+**Methods:** `GET`, `PUT`, `PATCH`, `DELETE`
+
+* **GET** → Retrieve a single post
+* **PUT / PATCH** → Update a post (author only)
+* **DELETE** → Delete a post (author only)
+
+**Filtering / Searching / Ordering**
+
+```
+GET /api/posts/?search=keyword&author__username=johndoe&ordering=-created_at
+```
+
+---
+
+## Comments API
+
+**Endpoint:** `/api/comments/`
+**Methods:** `GET`, `POST`
+
+* **GET /api/comments/** → List all comments (paginated)
+* **POST /api/comments/** → Create a new comment
+
+**POST Request**
+
+```json
+{
+    "post": 1,
+    "content": "This is a comment on the post."
+}
+```
+
+**POST Response**
+
+```json
+{
+    "id": 1,
+    "post": 1,
+    "author": "johndoe",
+    "content": "This is a comment on the post.",
+    "created_at": "2025-08-19T18:45:00Z",
+    "updated_at": "2025-08-19T18:45:00Z"
+}
+```
+
+**Endpoint:** `/api/comments/<id>/`
+**Methods:** `GET`, `PUT`, `PATCH`, `DELETE`
+
+* **GET** → Retrieve a single comment
+* **PUT / PATCH** → Update a comment (author only)
+* **DELETE** → Delete a comment (author only)
+
+**Filtering / Searching / Ordering**
+
+```
+GET /api/comments/?search=keyword&post=1&author__username=johndoe&ordering=-created_at
+```
+
+---
+
+## Permissions
+
+* Users can only edit or delete their own posts and comments.
+* Anyone can view posts and comments.
+
+---
+
+## Pagination
+
+* List endpoints for posts and comments are paginated.
+* Use `?page=<number>` to navigate pages.
+
+---
+
+## Notes
+
+* All dates are in ISO 8601 format.
+* Always include your authentication token when performing POST, PUT, PATCH, or DELETE requests.
+
+```

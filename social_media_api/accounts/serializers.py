@@ -23,3 +23,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         )
         Token.objects.create(user=user)
         return user
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'bio', 'profile_picture', 'followers']
+        read_only_fields = ['id', 'followers']

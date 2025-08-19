@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from .serializers import UserRegistrationSerializer, UserProfileSerializer
 from django.contrib.auth import get_user_model
 
+
 User = get_user_model()
 
 # Registration View
@@ -34,3 +35,4 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
+    
