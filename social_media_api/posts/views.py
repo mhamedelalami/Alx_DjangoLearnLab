@@ -2,10 +2,9 @@ from rest_framework import viewsets, permissions, filters, status, generics
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-
-from social_media_api.notifications.models import Notification
+from notifications.models import Notification
 from .models import Post, Comment, Like
-from .serializers import PostSerializer, CommentSerializer
+from .serializers import PostSerializer, CommentSerializer, NotificationSerializer
 
 # Permission class
 class IsOwnerOrReadOnly(permissions.BasePermission):
@@ -68,3 +67,21 @@ class UnlikePostView(generics.GenericAPIView):
             return Response({"message": "You have unliked the post."}, status=status.HTTP_200_OK)
         except Like.DoesNotExist:
             return Response({"message": "You haven't liked this post yet."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class FeedView(generics.ListAPIView):
+    serializer_class = PostSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        # Example: show posts from users the current user follows
+        user = self.request.user
+        following_users = user.profile.following.all()  # adjust based on your follow model
+        return Post.objects.filter(author__in=following_users).order_by('-created_at')
+    
+class NotificationListView(generics.ListAPIView):
+    serializer_class = NotificationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Notification.objects.filter(recipient=self.request.user).order_by('-timestamp')
